@@ -36,6 +36,29 @@ Write a query that returns the person who has spent the most money.
     ORDER BY Total_money DESC
     LIMIT 1
 
+6Q: Write query to return the email, first name, last name, & Genre of all Rock Music listeners. 
+Return your list ordered alphabetically by email starting with A.
+Mtd1:   SELECT DISTINCT c.email, c.first_name, c.last_name FROM customer c
+        INNER JOIN invoice i ON c.customer_id = i.customer_id
+        INNER JOIN invoice_line il ON i.invoice_id = il.invoice_id
+        WHERE track_id IN (
+        	SELECT t.track_id FROM track t
+        	JOIN genre g ON g.genre_id = t.genre_id
+        	WHERE g.name = 'Rock')
+        ORDER BY c.email 
+
+Mtd2:   SELECT DISTINCT c.email, c.first_name, c.last_name FROM customer c
+        INNER JOIN invoice i ON c.customer_id = i.customer_id
+        INNER JOIN invoice_line il ON i.invoice_id = il.invoice_id
+        INNER JOIN track t ON il.track_id = t.track_id
+        INNER JOIN genre g ON t.genre_id = g.genre_id
+        WHERE g.name = 'Rock'
+        ORDER BY c.email 
+            
+
+	
+
+
 
 
 
