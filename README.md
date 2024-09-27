@@ -54,6 +54,10 @@ Mtd2:   SELECT DISTINCT c.email, c.first_name, c.last_name FROM customer c
         INNER JOIN genre g ON t.genre_id = g.genre_id
         WHERE g.name = 'Rock'
         ORDER BY c.email 
+
+ 7Q: Let's invite the artists who have written the most rock music in our dataset. 
+     Write a query that returns the Artist name and total track count of the top 10 rock bands. 
+
             
 
 	
