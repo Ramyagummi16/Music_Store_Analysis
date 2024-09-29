@@ -75,9 +75,8 @@ Mtd2:   SELECT DISTINCT c.email, c.first_name, c.last_name FROM customer c
      ORDER BY milliseconds DESC:
 
 9Q: Find how much amount spent by each customer on top selling artists? Write a query to return customer name, artist name and total spent?
---Create a CTE to find top selling artist
---Create a CTE to find top selling artist
-	with top_selling_artist AS(
+    --Create a CTE to find top selling artist
+ 	with top_selling_artist AS(
 		SELECT ar.artist_id as artist_id, ar.name as artist_name, sum(il.unit_price*il.quantity) as total_spent 
 		FROM invoice_line il
 		JOIN track t ON t.track_id = il.track_id
@@ -97,6 +96,58 @@ Mtd2:   SELECT DISTINCT c.email, c.first_name, c.last_name FROM customer c
 	JOIN top_selling_artist tsa ON tsa.artist_id = a.artist_id
 	GROUP BY 1,2,3,4 
 	ORDER BY 5 DESC
+ 
+ 10Q: We want to find out the most popular music Genre for each country. We determine the most popular genre as the genre 
+      with the highest amount of purchases. Write a query that returns each country along with the top Genre. For countries where 
+      the maximum number of purchases is shared return all Genres
+
+      WITH popular_genre AS
+	(
+	SELECT c.country, COUNT(il.quantity)AS num_of_purchases, g.name,g.genre_id,
+		 ROW_NUMBER() OVER(PARTITION BY c.country ORDER BY COUNT(il.quantity) DESC) AS RoW_num
+	From invoice_line il
+	JOIN invoice i ON i.invoice_id = il.invoice_id
+	JOIN customer c ON c.customer_id = i.customer_id
+	JOIN track t ON t.traCk_id = il.track_id
+	JOIN genre g ON g.genre_id = t.genre_id
+	GROUP BY c.country, g.name,g.genre_id
+	ORDER BY c.country ASC, num_of_purchases DESC 
+	)
+	SELECT * FROM popular_genre WHERE RoW_num <=1
+
+ 11Q. Write a query that determines the customer that has spent the most on music for each country. 
+      Write a query that returns the country along with the top customer and how much they spent. 
+      For countries where the top amount spent is shared, provide all customers who spent this amount
+
+   MTD1-   	WITH recursive 
+	      	customer_with_country AS(
+			SELECT c.customer_id, c.first_name, c.last_name, i.billing_country, sum(total) as total_spent
+			FROM customer c 
+			JOIN invoice i ON i.customer_id = c.customer_id
+			GROUP BY 1, 2, 3, 4 
+			ORDER BY c.customer_id ASC, total_spent DESC, i.billing_country asc),
+	
+	    	country_most_spent AS(
+			SELECT billing_country, MAX(total_spent) as max_spending
+			FROM customer_with_country 
+			GROUP BY billing_country)
+
+		SELECT cc.billing_country, cc.total_spent, cc.first_name, cc.last_name, cc.customer_id
+		FROM customer_with_country cc
+		JOIN country_most_spent cs ON cc.billing_country = cs.billing_country
+		WHERE cc.total_spent = cs.max_spending
+		ORDER BY 1
+
+       MTD2-  WITH customer_with_country AS(
+			SELECT c.customer_id, c.first_name, c.last_name, i.billing_country, sum(total) as total_spent,
+					ROW_NUMBER() OVER(PARTITION BY I.billing_country ORDER BY sum(total) DESC) AS Row_num
+			FROM customer c
+			JOIN invoice i ON i.customer_id = c.customer_id
+			GROUP BY 1, 2, 3, 4 
+			ORDER BY total_spent DESC, i.billing_country asc)
+		SELECT * FROM customer_with_country WHERE Row_num <=1
+
+
 	  
 
 
